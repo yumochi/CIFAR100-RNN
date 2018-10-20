@@ -1,16 +1,16 @@
 # CIFAR100-ResNet
 
-Just a simple 8 layer CNN developed to work on CIFAR-10. The code is inspired by pytorch mnist tutorial, ie https://github.com/pytorch/examples/blob/master/mnist/main.py as well as work from CS598 D from UIUC, which is a 
-Deep Learning course I am taking.
+Just a simple residual neural net that runs on CIFAR100. It showcases some simple concepts like loading pretrained network, in this case resnet 18 and how to incorporate short cuts to create resnet on pytorch. The code is inspired by yunjey's pytorch tutorial, specifically the use of layer blocks, see https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/deep_residual_network/main.py#L76-L113 as well as work from CS598 D from UIUC, which is a Deep Learning course I am taking.
 
-Just a fun little project to show case some basic concepts like max pooling, batch normalization, and drop out.
+The code is divided into two parts, one is a simple residual net from scratch, ie main.py. The other is utiliized a pretained network, pretrained_net.py
+
 
 ## Getting Started
 
 To get started on the project is very easy, just
 
 ```
-git clone git@github.com:yumochi/CIFAR-10-CNN.git
+git clone git@github.com:yumochi/CIFAR100-ResNet.git
 ```
 
 ### Prerequisites
@@ -60,18 +60,18 @@ Comment out code if not needed
 # To run the code, just run
 
 ```
-python main.py
+python main.py/pre_trained.py
 ```
 # Set parameters with argparser
 
-For a list of terminal commands for the argparser, refer to texts below or check in hw3.py for all parameters
+For a list of terminal commands for the argparser, refer to texts below or check in main.py for all parameters
 
 # Set batch-size with --batch-size x
 
 x has to be an integer
 
 ```
-python hw3.py --batch-size 16
+python main.py --batch-size 16
 ```
 
 # Set epoch number with --epochs x
@@ -79,7 +79,7 @@ python hw3.py --batch-size 16
 x has to be an integer
 
 ```
-python hw3.py --epochs 30
+python main.py --epochs 30
 ```
 
 # Set learning rate with --lr x
@@ -87,7 +87,7 @@ python hw3.py --epochs 30
 x has to be an float
 
 ```
-python hw3.py --lr 0.0001
+python main.py --lr 0.0001
 ```
 
 # Set sample number in monte carlo approximation with --mck x
@@ -95,7 +95,7 @@ python hw3.py --lr 0.0001
 x has to be an integer
 
 ```
-python hw3.py --mck 16
+python main.py --mck 16
 ```
 
 ## Versioning
@@ -104,7 +104,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Yumo Chi** - *Initial work* - [CIFAR-10-CNN](https://github.com/yumochi/CIFAR-10-CNN)
+* **Yumo Chi** - *Initial work* - [CIFAR-100-ResNet](https://github.com/yumochi/CIFAR100-ResNet)
 
 
 ## Acknowledgments
