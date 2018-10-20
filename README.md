@@ -1,1 +1,1 @@
-# CIFAR100-RNN
+# CIFAR100-ResNet
