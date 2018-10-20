@@ -22,7 +22,22 @@ from torch.autograd import Variable
 from torchvision import datasets
 from torch.utils.data import DataLoader
 
+# model_url for selection on different pretrained nets
 
+model_urls = {
+    'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
+    'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
+    'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
+    'resnet101': 'https://download.pytorch.org/models/resnet101-5d3b4d8f.pth',
+    'resnet152': 'https://download.pytorch.org/models/resnet152-b121ed2d.pth',
+}
+
+# function to add pre trained net
+def resnet18(pretrained = True) :
+    model = torchvision.models.resnet.ResNet(torchvision.models.resnet.BasicBlock, [2, 2, 2, 2])
+    if pretrained :
+        model.load_state_dict(torch.utils.model_zoo.load_url(model_urls['resnet18'], model_dir ='./'))
+    return model
 
 # 2 filter block
 class ResNet_Block(nn.Module):
@@ -138,11 +153,12 @@ class ResNet(nn.Module):
         # apply soft_max to the result
         return F.log_softmax(x, dim=1)
 
+
 def main():
     # set up argparser
     parser = argparse.ArgumentParser(description='hw3')
     # batch-size
-    parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=128, metavar='N',
                         help='input batch size for training (default: 64)')
 
     # epochs
@@ -195,29 +211,35 @@ def main():
                                          shuffle=False, num_workers=1)
     batch_size = args.batch_size
 
-    # initialize the residual net
-    model = ResNet(ResNet_Block,[2,4,4,2]).to(device)
 
-    # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    # initialize the residual net
+    # model = ResNet(ResNet_Block,[2,4,4,2]).to(device)
+    model = resnet18()
+    model.fc = nn.Linear(512, 100)
+    model = model.cuda()
+
+    # # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     num_epochs = args.epochs
 
     model.train()
-
+    printFlag = True
     for epoch in range(1, args.epochs + 1):
         #Randomly shuffle data every epoch
         train_accu = []
         for batch_idx, (data, target) in enumerate(train_loader, 0):
+            # upsample for resnet 18
+            data = F.interpolate(data, size=(224, 224))
             data, target = Variable(data), Variable(target)
 
             data, target = data.to(device), target.to(device)
 
             optimizer.zero_grad()
 
-            output = model(data)
-
-            loss = F.nll_loss(output, target)
+            # change loss function
+            CEL = nn.CrossEntropyLoss().cuda()
+            loss = CEL(output, target)
 
             # start backprop
             loss.backward()
@@ -235,11 +257,16 @@ def main():
     model.eval()
     test_accu = []
     for batch_idx, (data, target) in enumerate(test_loader, 0):
-        data, target = Variable(data), Variable(target)
-        data, target = data.to(device), target.to(device)
+        # upsample for resnet 18
+        data_upsample = F.interpolate(data, size=(224, 224))
+        data_upsample, target = Variable(data_upsample), Variable(target)
+        data_upsample, target = data_upsample.to(device), target.to(device)
         optimizer.zero_grad()
-        output = model(data)
-        loss = F.nll_loss(output, target)
+        output = model(data_upsample)
+
+         # change loss function
+        CEL = nn.CrossEntropyLoss().cuda()
+        loss = CEL(output, target)
         prediction = output.data.max(1)[1] # first column has actual prob.
         accuracy = ( float( prediction.eq(target.data).sum() ) /float(batch_size)
            )*100.0
